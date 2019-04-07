@@ -4,16 +4,25 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import pygame
+import time
+#import Adafruit_GPIO.SPI as SPI
+import Adafruit_SSD1306
+from PIL import Image
 
 def bienvenue():
+   global disp
+   image = Image.open('media/img/bienvenue.ppm').convert('1')
+   disp.image(image)
+   disp.display()
    pygame.init()
-#   pygame.mixer.init(frequency=8000, size=-16, channels=2, buffer=4096)
    pygame.mixer.init()
    pygame.mixer.music.load("media/messages/b.wav")
    pygame.mixer.music.play()
-#   pygame.event.wait()
    while pygame.mixer.music.get_busy():
       pass
+# Clear display.
+   disp.clear()
+   disp.display()
    return
 
 def prologue():
@@ -26,7 +35,7 @@ def main():
    signal.signal(signal.SIGINT, end_read)
    MIFAREReader = MFRC522.MFRC522()
 
-   while true:
+   while True:
 # Detecter les tags
       (status,TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
 # Une carte est detectee
@@ -43,6 +52,17 @@ def end_read(signal,frame):
     continue_reading = False
     GPIO.cleanup()
 
+def configuration():
+   global disp
+   # Raspberry Pi pin configuration:
+   RST = 24
+   disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST)
+   disp.begin()
+# Clear display.
+   disp.clear()
+   disp.display()
+
 if __name__ == '__main__':
-        main()
+   configuration()
+   main()
 
