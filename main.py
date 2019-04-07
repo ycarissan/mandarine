@@ -29,34 +29,62 @@ class Mandarine:
         self.disp.display()
         #Add interrupt on GPIO_23
         GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP)
-        GPIO.add_event_detect(23, GPIO.FALLING, callback=self.nextDir, bouncetime=300)
+        GPIO.add_event_detect(23, GPIO.FALLING, callback=self.playNext, bouncetime=300)
 # au cas ou  if GPIO.event_detected(channel):
 #                print('Bouton enfoncé')
+        #init mixer
+        pygame.init()
+        pygame.mixer.init()
         self.prologue()
 
-    def nextDir(self, channel):
-        print('channel:'+str(channel))
-        print('self.nextDir() a faire')
+    def prologue(self):
+        #on joue un son de bienvenue
+        # et on affiche une jolie image
+        self.bienvenue()
 
     def bienvenue(self):
         image = Image.open('media/img/bienvenue.ppm').convert('1')
         self.disp.image(image)
         self.disp.display()
-        pygame.init()
-        pygame.mixer.init()
-        pygame.mixer.music.load("media/messages/b.wav")
-        pygame.mixer.music.play()
+        self.playFile("media/messages/b.wav")
+        #on attend la fin du message de bienvenue
         while pygame.mixer.music.get_busy():
             pass
         # Clear display.
         self.disp.clear()
         self.disp.display()
         return
+    
+    def loadDir(self, dirname):
+        """
+        En cours 
+        """
+        playlist = list()
+        for f in 'ls dirname':
+            playlist.append(f)
+        pygame.mixer.music.load(playlist.pop())
+        pygame.mixer.music.queue(playlist.pop())
+        pygame.mixer.music.set_endevent(pygame.USEREVENT)
+        pygame.mixer.music.play()
 
-    def prologue(self):
-        #on joue un son de bienvenue
-        # et on affiche une jolie image
-        self.bienvenue()
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.USEREVENT:
+                    if len(playlist)>0:
+                        pygame.mixer.music.queue(playlist.pop())
+
+    def playNext(self, channel):
+        self.stopPlaying()
+        filename=""
+        self.playFile(filename)
+
+    def stopPlaying(self):
+        pygame.mixer.music.stop()
+
+    def playFile(self,filename):
+        pygame.mixer.music.load(filename)
+        pygame.mixer.music.play()
 
     def main(self):
         continue_reading = True
