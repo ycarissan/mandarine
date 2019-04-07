@@ -27,7 +27,16 @@ class Mandarine:
         # Clear display.
         self.disp.clear()
         self.disp.display()
+        #Add interrupt on GPIO_23
+        GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+        GPIO.add_event_detect(23, GPIO.FALLING, callback=self.nextDir, bouncetime=300)
+# au cas ou  if GPIO.event_detected(channel):
+#                print('Bouton enfoncé')
         self.prologue()
+
+    def nextDir(self, channel):
+        print('channel:'+str(channel))
+        print('self.nextDir() a faire')
 
     def bienvenue(self):
         image = Image.open('media/img/bienvenue.ppm').convert('1')
@@ -70,6 +79,7 @@ class Mandarine:
          print ("Lecture terminée")
          continue_reading = False
          GPIO.cleanup()
+
 
 if __name__ == '__main__':
     mandarine = Mandarine()
